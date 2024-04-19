@@ -69,42 +69,6 @@ option:
   }
 }
 
-int writeUserToFile(struct User *user) {
-  FILE *file = fopen("user_data.bin", "ab");
-  if (file == NULL) {
-    printf("Unable to open file for writing.\n");
-    fclose(file);
-    return 0;
-  }
-  int flag = 0;
-  flag = fwrite(user, sizeof(struct User), 1, file);
-  if (flag) {
-    fclose(file);
-    return 1;
-  } else {
-    printf("Error Writing new user to file!\n");
-    fclose(file);
-    return 0;
-  }
-}
-
-struct UserNode *readUsersFromFile() {
-  struct UserNode *head;
-  head = NULL;
-  FILE *file = fopen("user_data.bin", "rb");
-  if (file == NULL) {
-    // printf("Unable to open file for writing.\n");
-    fclose(file);
-    return head;
-  }
-  struct User user;
-  while (fread(&user, sizeof(struct User), 1, file)) {
-    head = userListPush(head, user);
-  }
-  fclose(file);
-  return head;
-}
-
 int doesEmailExist(struct UserNode *userHead, char email[]) {
   struct UserNode *ptr = userHead;
   while (ptr != NULL) {
@@ -120,6 +84,7 @@ int registerUser() {
   struct DOB dob;
   struct User user;
   struct Location location;
+  struct UserNode *userHead = readUsersFromFile();
   system("cls || clear");
   printf("=================== User Registration ======================\n");
   printf("Enter First Name: ");
@@ -129,6 +94,11 @@ int registerUser() {
 email:
   printf("Enter Email: ");
   scanf("%s", user.email);
+  if (doesEmailExist(userHead, user.email)) {
+    printf("============= Warning: Given email already exist, pelase use "
+           "another one =============\n");
+    goto email;
+  };
   printf("Enter Height: ");
   scanf("%f", &user.height);
   printf("Enter Place: ");
@@ -158,4 +128,48 @@ next:
   user.location = location;
   user.date_of_birth = dob;
   return 1;
+}
+
+int loginUser() {
+  char email[50], password[50];
+  system("cls || clear");
+  printf("=================== User Login ======================\n");
+login:
+  printf("Enter Email: ");
+  scanf("%s", email);
+  printf("Enter Password: ");
+  scanf("%s", password);
+  struct UserNode *userHead = readUsersFromFile();
+  struct UserNode *ptr = userHead;
+  int userFoundFlag = 0;
+  while (ptr != NULL) {
+    if (strcmp(email, ptr->user.email) == 0 &&
+        strcmp(password, ptr->user.password) == 0) {
+      userFoundFlag = 1;
+      break;
+    }
+    ptr = ptr->next;
+  }
+  if (!userFoundFlag) {
+    printf("=========== Warning: User not found with given "
+           "credential, please login again"
+           "===========\n");
+    goto login;
+  }
+  system("cls || clear");
+  printf("=================== Hello, %s ======================\n "
+         "================ Your Information ===================\n",
+         ptr->user.email);
+  printUser(&ptr->user);
+  return 1;
+}
+
+void printUser(struct User *user) {
+  printf("UID: %d\nFullName: %s %s\nEmail: %s\nHeight: %f "
+         "Feet\nLocation: "
+         "%s, %s\nDate of Birth: %d-%d-%d",
+         (*user).uid, (*user).first_name, (*user).last_name, (*user).email,
+         (*user).height, (*user).location.place, (*user).location.district,
+         (*user).date_of_birth.year, (*user).date_of_birth.month,
+         (*user).date_of_birth.day);
 }
