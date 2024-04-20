@@ -69,6 +69,42 @@ option:
   }
 }
 
+int writeUserToFile(struct User *user) {
+  FILE *file = fopen("user_data.bin", "ab");
+  if (file == NULL) {
+    printf("Unable to open file for writing.\n");
+    fclose(file);
+    return 0;
+  }
+  int flag = 0;
+  flag = fwrite(user, sizeof(struct User), 1, file);
+  if (flag) {
+    fclose(file);
+    return 1;
+  } else {
+    printf("Error Writing new user to file!\n");
+    fclose(file);
+    return 0;
+  }
+}
+
+struct UserNode *readUsersFromFile() {
+  struct UserNode *head;
+  head = NULL;
+  FILE *file = fopen("user_data.bin", "rb");
+  if (file == NULL) {
+    // printf("Unable to open file for writing.\n");
+    fclose(file);
+    return head;
+  }
+  struct User user;
+  while (fread(&user, sizeof(struct User), 1, file)) {
+    head = userListPush(head, user);
+  }
+  fclose(file);
+  return head;
+}
+
 int doesEmailExist(struct UserNode *userHead, char email[]) {
   struct UserNode *ptr = userHead;
   while (ptr != NULL) {
@@ -127,6 +163,12 @@ next:
   scanf("%d", &dob.day);
   user.location = location;
   user.date_of_birth = dob;
+  user.uid = lengthOfUser(userHead);
+  if (writeUserToFile(&user))
+    printf("User registered successfully\n");
+  // push added user to linked list
+  userHead = userListPush(userHead, user);
+  // userListTraversal(userHead);
   return 1;
 }
 
