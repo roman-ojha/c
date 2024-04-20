@@ -199,9 +199,9 @@ login:
     goto login;
   }
   system("cls || clear");
-  printf("=================== Hello, %s ======================\n "
+  printf("=================== Hello, %s %s ======================\n "
          "================ Your Information ===================\n",
-         ptr->user.email);
+         ptr->user.first_name, ptr->user.last_name);
   printUser(&ptr->user);
   return 1;
 }
@@ -214,4 +214,48 @@ void printUser(struct User *user) {
          (*user).height, (*user).location.place, (*user).location.district,
          (*user).date_of_birth.year, (*user).date_of_birth.month,
          (*user).date_of_birth.day);
+}
+
+void userListTraversal(struct UserNode *head) {
+  struct UserNode *ptr = head;
+  if (isListEmpty(head))
+    printf("User Linked List is empty");
+  else {
+    while (ptr != NULL) {
+      printUser(&ptr->user);
+      ptr = ptr->next;
+    }
+  }
+}
+
+struct UserNode *userListPush(struct UserNode *head, struct User user) {
+  struct UserNode *ptr = (struct UserNode *)malloc(sizeof(struct UserNode));
+  ptr->user = user;
+  ptr->next = NULL;
+  struct UserNode *p = head;
+  if (isListEmpty(head))
+    head = ptr;
+  else {
+    while (p->next != NULL) {
+      p = p->next;
+    }
+    p->next = ptr;
+  }
+  return head;
+}
+
+int isListEmpty(struct UserNode *head) {
+  if (head == NULL)
+    return 1;
+  return 0;
+}
+
+int lengthOfUser(struct UserNode *userHead) {
+  int i = 0;
+  struct UserNode *ptr = userHead;
+  while (ptr != NULL) {
+    i++;
+    ptr = ptr->next;
+  }
+  return i;
 }
